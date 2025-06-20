@@ -17,6 +17,31 @@ software which enables the use of this currency.
 For more information, as well as an immediately useable, binary version of
 the GamePay Core software, see [https://gamepay.org](https://gamepay.org).
 
+Install GamePay
+-------
+git clone https://github.com/Globaleliteee/GamePay
+GAMEPAY_ROOT=$(pwd)/GamePay
+BDB_PREFIX="${GAMEPAY_ROOT}/db4"
+mkdir -p $BDB_PREFIX
+wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+
+tar -xzvf db-4.8.30.NC.tar.gz
+cd db-4.8.30.NC/build_unix/
+find . -type f \( -name "*.cpp" -o -name "*.h" \) -exec sed -i 's/__atomic_compare_exchange/my_atomic_compare_exchange/g' {} +
+../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
+make install
+
+cd $GAMEPAY_ROOT
+./autogen.sh
+./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --enable-upnp-default --without-gui
+
+./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --enable-upnp-default --with-gui=qt5
+make -j$(nproc)
+make install
+cd src
+strip gamepayd
+
 License
 -------
 
