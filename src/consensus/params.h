@@ -50,6 +50,8 @@ struct BIP9Deployment {
     static constexpr int64_t NEVER_ACTIVE = -2;
 };
 
+static const uint256 powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
 /**
  * Parameters that influence chain consensus.
  */

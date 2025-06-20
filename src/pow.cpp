@@ -9,49 +9,93 @@
 #include <chain.h>
 #include <primitives/block.h>
 #include <uint256.h>
+#include <logging.h>
+#include <arith_uint256.h>
+#include "validation.h"
+#include "consensus/params.h"
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
-{
-    assert(pindexLast != nullptr);
-    unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+#include <math.h>  // For pow()
 
-    // Only change once per difficulty adjustment interval
-    if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
-    {
-        if (params.fPowAllowMinDifficultyBlocks)
-        {
-            // Special difficulty rule for testnet:
-            // If the new block's timestamp is more than 2* 10 minutes
-            // then allow mining of a min-difficulty block.
-            if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing*2)
-                return nProofOfWorkLimit;
-            else
-            {
-                // Return the last non-special-min-difficulty-rules-block
-                const CBlockIndex* pindex = pindexLast;
-                while (pindex->pprev && pindex->nHeight % params.DifficultyAdjustmentInterval() != 0 && pindex->nBits == nProofOfWorkLimit)
-                    pindex = pindex->pprev;
-                return pindex->nBits;
-            }
-        }
-        return pindexLast->nBits;
+unsigned int KimotoGravityWell(const CBlockIndex* pindexLast, const Consensus::Params& params) {
+    const int64_t PastBlocksMin = 24;
+    const int64_t PastBlocksMax = 24;
+
+    if (pindexLast == nullptr || pindexLast->nHeight == 0) {
+        LogPrintf("KGW: No previous block, returning powLimit\n");
+        return UintToArith256(params.powLimit).GetCompact();
     }
 
-    // Go back by what we want to be 14 days worth of blocks
-    // Litecoin: This fixes an issue where a 51% attack can change difficulty at will.
-    // Go back the full period unless it's the first retarget after genesis. Code courtesy of Art Forz
-    int blockstogoback = params.DifficultyAdjustmentInterval()-1;
-    if ((pindexLast->nHeight+1) != params.DifficultyAdjustmentInterval())
-        blockstogoback = params.DifficultyAdjustmentInterval();
+    int64_t PastBlocksMass = 0;
+    int64_t PastRateActualSeconds = 0;
+    int64_t PastRateTargetSeconds = 0;
+    double PastDifficultyAverage = 0;
+    double PastDifficultyAveragePrev = 0;
 
-    // Go back by what we want to be 14 days worth of blocks
-    const CBlockIndex* pindexFirst = pindexLast;
-    for (int i = 0; pindexFirst && i < blockstogoback; i++)
-        pindexFirst = pindexFirst->pprev;
+    const CBlockIndex* BlockReading = pindexLast;
 
-    assert(pindexFirst);
+    for (int64_t i = 1; BlockReading && BlockReading->nHeight > 0 && i <= PastBlocksMax; i++) {
+        if (i <= PastBlocksMin) {
+            if (i == 1) {
+                PastDifficultyAverage = double(BlockReading->nBits);
+            } else {
+                PastDifficultyAverage = ((double(BlockReading->nBits) - PastDifficultyAveragePrev) / i) + PastDifficultyAveragePrev;
+            }
+            PastDifficultyAveragePrev = PastDifficultyAverage;
+        }
 
-    return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
+        PastBlocksMass++;
+
+        int64_t BlockTime = BlockReading->GetBlockTime();
+        int64_t PrevBlockTime = (BlockReading->pprev) ? BlockReading->pprev->GetBlockTime() : BlockTime;
+        int64_t SolveTime = BlockTime - PrevBlockTime;
+
+        if (SolveTime < 0)
+            SolveTime = 0;
+        if (SolveTime > 6 * params.nPowTargetSpacing)
+            SolveTime = 6 * params.nPowTargetSpacing;
+
+        PastRateActualSeconds += SolveTime;
+        PastRateTargetSeconds += params.nPowTargetSpacing;
+
+        BlockReading = BlockReading->pprev;
+    }
+
+    if (PastRateActualSeconds == 0 || PastRateTargetSeconds == 0) {
+        LogPrintf("KGW: PastRateActualSeconds or PastRateTargetSeconds is zero, returning powLimit\n");
+        return UintToArith256(params.powLimit).GetCompact();
+    }
+
+    double RateAdjustmentRatio = double(PastRateTargetSeconds) / double(PastRateActualSeconds);
+
+    double EventHorizonDeviation = 1 + (0.7084 * pow((double(PastBlocksMass) / 28.2), -1.228));
+    double EventHorizonDeviationFast = EventHorizonDeviation;
+    double EventHorizonDeviationSlow = 1 / EventHorizonDeviation;
+
+    if (RateAdjustmentRatio <= EventHorizonDeviationSlow || RateAdjustmentRatio >= EventHorizonDeviationFast) {
+        LogPrintf("KGW: RateAdjustmentRatio %f outside event horizon, returning powLimit\n", RateAdjustmentRatio);
+        return UintToArith256(params.powLimit).GetCompact();
+    }
+
+    arith_uint256 bnNew;
+    bnNew.SetCompact(pindexLast->nBits);
+
+    bnNew = bnNew * RateAdjustmentRatio;
+
+    if (bnNew == 0 || bnNew > UintToArith256(params.powLimit)) {
+        bnNew = UintToArith256(params.powLimit);
+    }
+
+    LogPrintf("KGW: PastBlocksMass=%lld, PastRateActualSeconds=%lld, PastRateTargetSeconds=%lld\n",
+              PastBlocksMass, PastRateActualSeconds, PastRateTargetSeconds);
+    LogPrintf("KGW: RateAdjustmentRatio=%f, NewDifficulty=%s\n",
+              RateAdjustmentRatio, bnNew.GetHex());
+
+    return bnNew.GetCompact();
+}
+
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
+{
+    return KimotoGravityWell(pindexLast, params);
 }
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
