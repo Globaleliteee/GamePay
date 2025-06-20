@@ -118,3 +118,7 @@ Translations are periodically pulled from Transifex and merged into the git repo
 
 **Important**: We do not accept translation changes as GitHub pull requests because the next
 pull from Transifex would automatically overwrite them again.
+
+Last Merge from Litecoin Source
+------------
+Merge pull request #1017 from DavidBurkett/issue_1006 09a67c2 
