@@ -1,9 +1,9 @@
-// Copyright(C) 2011 - 2020 The Litecoin Core developers
+// Copyright(C) 2011 - 2020 The GamePay Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef LITECOIN_MWEB_MODELS_H
-#define LITECOIN_MWEB_MODELS_H
+#ifndef GAMEPAY_MWEB_MODELS_H
+#define GAMEPAY_MWEB_MODELS_H
 
 #include <amount.h>
 #include <mw/models/block/Block.h>
@@ -232,4 +232,4 @@ struct Tx {
 
 } // namespace MWEB
 
-#endif // LITECOIN_MWEB_MODELS_H
+#endif // GAMEPAY_MWEB_MODELS_H

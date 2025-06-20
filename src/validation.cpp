@@ -640,7 +640,7 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
                 // insecure.
                 bool fReplacementOptOut = true;
 
-                // Litecoin: Only support BIP125 RBF when -mempoolreplacement arg is set
+                // GamePay: Only support BIP125 RBF when -mempoolreplacement arg is set
                 if (gArgs.GetArg("-mempoolreplacement", DEFAULT_ENABLE_REPLACEMENT)) {
                     for (const CTxIn &_txin : ptxConflicting->vin)
                     {
@@ -1265,14 +1265,20 @@ bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
+    // 1.Team Premine for first 500 blocks (10% of 1 billion coins = 100 million)
+    if (nHeight <= 500) {
+        return 200000 * COIN; // 100,000,000 / 500 = 200,000 coins per block
+    }
+
+    // 2. Normal block reward starts after premine
+    int halvings = (nHeight - 501) / consensusParams.nSubsidyHalvingInterval;
+
     if (halvings >= 64)
         return 0;
 
-    CAmount nSubsidy = 1000 * COIN;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
+    CAmount nSubsidy = 1000 * COIN; // Starting reward after premine
+    nSubsidy >>= halvings;          // Halve every interval
+
     return nSubsidy;
 }
 

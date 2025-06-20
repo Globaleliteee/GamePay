@@ -88,22 +88,22 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += litecoind
+  bin_PROGRAMS += gamepayd
 endif
 
 if BUILD_BITCOIN_NODE
-  bin_PROGRAMS += litecoin-node
+  bin_PROGRAMS += gamepay-node
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += litecoin-cli
+  bin_PROGRAMS += gamepay-cli
 endif
 if BUILD_BITCOIN_TX
-  bin_PROGRAMS += litecoin-tx
+  bin_PROGRAMS += gamepay-tx
 endif
 if ENABLE_WALLET
 if BUILD_BITCOIN_WALLET
-  bin_PROGRAMS += litecoin-wallet
+  bin_PROGRAMS += gamepay-wallet
 endif
 endif
 
@@ -644,16 +644,16 @@ nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
 # bitcoind & bitcoin-node binaries #
-litecoin_daemon_sources = bitcoind.cpp
-litecoin_bin_cppflags = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-litecoin_bin_cxxflags = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoin_bin_ldflags = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+gamepay_daemon_sources = bitcoind.cpp
+gamepay_bin_cppflags = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+gamepay_bin_cxxflags = $(AM_CXXFLAGS) $(PIE_FLAGS)
+gamepay_bin_ldflags = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-litecoin_daemon_sources += bitcoind-res.rc
+gamepay_daemon_sources += bitcoind-res.rc
 endif
 
-litecoin_bin_ldadd = \
+gamepay_bin_ldadd = \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -667,50 +667,50 @@ litecoin_bin_ldadd = \
   $(LIBSECP256K1) \
   $(LIBMW)
 
-litecoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(MWEB_LIBS)
+gamepay_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(MWEB_LIBS)
 
-litecoind_SOURCES = $(litecoin_daemon_sources)
-litecoind_CPPFLAGS = $(litecoin_bin_cppflags)
-litecoind_CXXFLAGS = $(litecoin_bin_cxxflags)
-litecoind_LDFLAGS = $(litecoin_bin_ldflags)
-litecoind_LDADD = $(LIBBITCOIN_SERVER) $(litecoin_bin_ldadd)
+gamepayd_SOURCES = $(gamepay_daemon_sources)
+gamepayd_CPPFLAGS = $(gamepay_bin_cppflags)
+gamepayd_CXXFLAGS = $(gamepay_bin_cxxflags)
+gamepayd_LDFLAGS = $(gamepay_bin_ldflags)
+gamepayd_LDADD = $(LIBBITCOIN_SERVER) $(gamepay_bin_ldadd)
 
-litecoin_node_SOURCES = $(litecoin_daemon_sources)
-litecoin_node_CPPFLAGS = $(litecoin_bin_cppflags)
-litecoin_node_CXXFLAGS = $(litecoin_bin_cxxflags)
-litecoin_node_LDFLAGS = $(litecoin_bin_ldflags)
-litecoin_node_LDADD = $(LIBBITCOIN_SERVER) $(litecoin_bin_ldadd)
+gamepay_node_SOURCES = $(gamepay_daemon_sources)
+gamepay_node_CPPFLAGS = $(gamepay_bin_cppflags)
+gamepay_node_CXXFLAGS = $(gamepay_bin_cxxflags)
+gamepay_node_LDFLAGS = $(gamepay_bin_ldflags)
+gamepay_node_LDADD = $(LIBBITCOIN_SERVER) $(gamepay_bin_ldadd)
 
 # bitcoin-cli binary #
-litecoin_cli_SOURCES = bitcoin-cli.cpp
-litecoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-litecoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+gamepay_cli_SOURCES = bitcoin-cli.cpp
+gamepay_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+gamepay_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+gamepay_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-litecoin_cli_SOURCES += bitcoin-cli-res.rc
+gamepay_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-litecoin_cli_LDADD = \
+gamepay_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-litecoin_cli_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(MWEB_LIBS)
+gamepay_cli_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(MWEB_LIBS)
 #
 
 # bitcoin-tx binary #
-litecoin_tx_SOURCES = bitcoin-tx.cpp
-litecoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-litecoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-litecoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+gamepay_tx_SOURCES = bitcoin-tx.cpp
+gamepay_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+gamepay_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+gamepay_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-litecoin_tx_SOURCES += bitcoin-tx-res.rc
+gamepay_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-litecoin_tx_LDADD = \
+gamepay_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -719,17 +719,17 @@ litecoin_tx_LDADD = \
   $(LIBSECP256K1) \
   $(LIBMW)
 
-litecoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(MWEB_LIBS)
+gamepay_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(MWEB_LIBS)
 
 # bitcoin-wallet binary #
-litecoin_wallet_SOURCES = bitcoin-wallet.cpp
-litecoin_wallet_CPPFLAGS = $(litecoin_bin_cppflags)
-litecoin_wallet_CXXFLAGS = $(litecoin_bin_cxxflags)
-litecoin_wallet_LDFLAGS = $(litecoin_bin_ldflags)
-litecoin_wallet_LDADD = $(LIBBITCOIN_WALLET_TOOL) $(litecoin_bin_ldadd)
+gamepay_wallet_SOURCES = bitcoin-wallet.cpp
+gamepay_wallet_CPPFLAGS = $(gamepay_bin_cppflags)
+gamepay_wallet_CXXFLAGS = $(gamepay_bin_cxxflags)
+gamepay_wallet_LDFLAGS = $(gamepay_bin_ldflags)
+gamepay_wallet_LDADD = $(LIBBITCOIN_WALLET_TOOL) $(gamepay_bin_ldadd)
 
 if TARGET_WINDOWS
-litecoin_wallet_SOURCES += bitcoin-wallet-res.rc
+gamepay_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 #
 
