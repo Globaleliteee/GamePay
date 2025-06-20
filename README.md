@@ -19,6 +19,20 @@ the GamePay Core software, see [https://gamepay.org](https://gamepay.org).
 
 Install GamePay
 -------
+Installation Instructions
+
+Clone the repository and set up environment variables:
+
+```bash
+apt-get install nano
+apt-get install git
+apt-get install cron
+
+apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
+apt-get install libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
+apt-get install libminiupnpc-dev
+apt-get install libzmq3-dev
+
 git clone https://github.com/Globaleliteee/GamePay
 GAMEPAY_ROOT=$(pwd)/GamePay
 BDB_PREFIX="${GAMEPAY_ROOT}/db4"
@@ -34,13 +48,16 @@ make install
 
 cd $GAMEPAY_ROOT
 ./autogen.sh
-./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --enable-upnp-default --without-gui
 
+./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --enable-upnp-default --without-gui
+# Or with GUI support:
 ./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --enable-upnp-default --with-gui=qt5
+
 make -j$(nproc)
 make install
 cd src
 strip gamepayd
+```
 
 License
 -------
